@@ -6,9 +6,10 @@ import json, os, fire, logging
 
 class Spider(object):
     def __init__(self, worker_num=10, chunk_size=10000, log_interval=600,
-                 data_dir='data', log_dir='log'):
+                 data_dir='data', log_dir='log', min_attrib_num=3):
         self.chunk_size = chunk_size
         self.log_interval = log_interval
+        self.min_attrib_num = min_attrib_num
         self.urls = Queue()
         self.results = Queue()
         self.url_cache = set()
@@ -28,7 +29,7 @@ class Spider(object):
 
         self.writer = Thread(target=self._write)
         self.logger = Timer(log_interval, self._log)
-        self.spiders = [Thread(target=self._scrap, args=(n,)) for n in range(worker_num)]
+        self.spiders = [Thread(target=self._scrap) for _ in range(worker_num)]
 
 
     def start(self, url):
@@ -77,7 +78,7 @@ class Spider(object):
         timer = Timer(self.log_interval, self._log)
         timer.start() 
 
-    def _scrap(self, n):
+    def _scrap(self):
         while self.state:
             if not self.urls.empty():
                 url = self.urls.get()
@@ -91,7 +92,7 @@ class Spider(object):
                 if name not in self.name_cache:
                     self.name_cache.add(name)
                     self.url_cache.add(url)
-                    if len(new_data['infomation']) > 4:
+                    if len(new_data['infomation']) >= self.min_attrib_num:
                         self.results.put(new_data)
                 for url in new_urls:
                     if url not in self.url_cache:
@@ -103,6 +104,7 @@ class Spider(object):
 def main(worker_num=20,
          chunk_size=10000,
          log_interval=600,
+         min_attrib_num=3,
          data_dir='data',
          log_dir='log',
          start_url='https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28'):
