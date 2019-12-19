@@ -2,9 +2,9 @@
 #-*- coding:utf8 -*-
 
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, unquote
+from urllib.parse import urljoin, quote, unquote
 from urllib import request
-import re, urllib
+import re, urllib, string
 
 class HtmlParser(object):
     '''解析器'''
@@ -39,18 +39,24 @@ class HtmlParser(object):
 
         # get summary
         summary_node = soup.find('div', class_="lemma-summary")
-        summary_para_nodes = summary_node.find_all('div', class_='para')
-        summary_paras = paras = [p.get_text().replace('\n', '').strip() for p in summary_para_nodes]
-        res_data['summary'] = self._clean_text('\n'.join(summary_paras))
+        if summary_node is None:
+            res_data['summary'] = []
+        else:
+            summary_para_nodes = summary_node.find_all('div', class_='para')
+            summary_paras = paras = [p.get_text().replace('\n', '').strip() for p in summary_para_nodes]
+            res_data['summary'] = self._clean_text('\n'.join(summary_paras))
 
         # get information
         info_node = soup.find('div', class_="basic-info cmn-clearfix")
-        name_nodes = info_node.find_all('dt', class_="basicInfo-item name")
-        value_nodes = info_node.find_all('dd', class_="basicInfo-item value")
-        assert len(name_nodes) == len(value_nodes), 'Number of names and values are not equal.'
-        names = [self._clean_text(name.get_text()).strip() for name in name_nodes]
-        values = [value.get_text().strip() for value in value_nodes]
-        res_data['infomation'] = dict(zip(names, values))
+        if info_node is None:
+            res_data['infomation'] = []
+        else:
+            name_nodes = info_node.find_all('dt', class_="basicInfo-item name")
+            value_nodes = info_node.find_all('dd', class_="basicInfo-item value")
+            assert len(name_nodes) == len(value_nodes), 'Number of names and values are not equal.'
+            names = [self._clean_text(name.get_text()).strip() for name in name_nodes]
+            values = [value.get_text().strip() for value in value_nodes]
+            res_data['infomation'] = dict(zip(names, values))
 
         # get contents
         nodes = soup.find_all('div', class_=['para-title level-2', 'para-title level-3', 'para'])
@@ -122,6 +128,7 @@ class HtmlParser(object):
             
 
     def parse(self, url):
+        url = quote(url, safe=string.printable)
         html = self._open(url)
         soup = BeautifulSoup(html, 'html.parser')
         soup = self._clean_soup(soup)
@@ -138,7 +145,8 @@ if __name__ == '__main__':
         'https://baike.baidu.com/item/%E5%B7%9D/1190230',
         'https://baike.baidu.com/item/%E5%84%92%E6%9E%97%E5%A4%96%E5%8F%B2/27018',
         'https://baike.baidu.com/item/%E5%BE%90%E9%94%A1%E9%BA%9F/820817',
-        'https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28'
+        'https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28',
+        'https://baike.baidu.com/item/%E4%B9%89%E9%A1%B9'
     ]
 
     with open('baike.json', 'wb') as fp:

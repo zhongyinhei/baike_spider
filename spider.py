@@ -1,7 +1,7 @@
 from parser import HtmlParser
 from queue import Queue
 from threading import Thread, Timer
-from time import sleep
+from time import sleep, time
 import json, os, fire, logging
 
 class Spider(object):
@@ -28,7 +28,7 @@ class Spider(object):
 
         self.writer = Thread(target=self._write)
         self.logger = Timer(log_interval, self._log)
-        self.spiders = [Thread(target=self._scrap) for _ in range(worker_num)]
+        self.spiders = [Thread(target=self._scrap, args=(n,)) for n in range(worker_num)]
 
 
     def start(self, url):
@@ -58,7 +58,7 @@ class Spider(object):
                         fp.write(line.encode('utf8'))
                         n += 1
                     else:
-                        sleep(100)
+                        sleep(10)
 
     def _log(self):
         now = len(self.name_cache)
@@ -77,7 +77,7 @@ class Spider(object):
         timer = Timer(self.log_interval, self._log)
         timer.start() 
 
-    def _scrap(self):
+    def _scrap(self, n):
         while self.state:
             if not self.urls.empty():
                 url = self.urls.get()
@@ -97,10 +97,10 @@ class Spider(object):
                     if url not in self.url_cache:
                         self.urls.put(url)
             else:
-                sleep(100)
+                sleep(10)
 
 
-def main(worker_num=30,
+def main(worker_num=20,
          chunk_size=10000,
          log_interval=600,
          data_dir='data',
