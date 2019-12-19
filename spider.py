@@ -71,7 +71,7 @@ class Spider(object):
         else:
             with open(os.path.join(self.log_dir, 'log'), 'ab+') as fp:
                 message = '增加实体数量：{}，保存实体数量：{}；缓存任务数量：{}，缓存结果数量：{}.'.format(
-                    increase, now, self.urls._qsize, self.results._qsize(),
+                    increase, now, self.urls._qsize(), self.results._qsize(),
                 ) + '\n'
                 fp.write(message.encode('utf8'))
         timer = Timer(self.log_interval, _log)
