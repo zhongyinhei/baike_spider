@@ -15,7 +15,7 @@ class Spider(object):
         self.name_cache = set()
         self.chunk_num = 0
         self.parser = HtmlParser(home='https://baike.baidu.com')
-        
+
         self.last = 0
         self.state = 1
 
@@ -70,7 +70,9 @@ class Spider(object):
             exit()
         else:
             with open(os.path.join(self.log_dir, 'log'), 'ab+') as fp:
-                message = 'Increase %d entities, totally saved %d entities.' % (increase, now) + '\n'
+                message = '增加实体数量：{}，保存实体数量：{}；缓存任务数量：{}，缓存结果数量：{}.'.format(
+                    increase, now, self.urls._qsize, self.results._qsize(),
+                ) + '\n'
                 fp.write(message.encode('utf8'))
         timer = Timer(self.log_interval, _log)
         timer.start() 
