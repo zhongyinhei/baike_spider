@@ -6,10 +6,9 @@ import json, os, fire, logging
 
 class Spider(object):
     def __init__(self, worker_num=10, chunk_size=10000, log_interval=600,
-                 data_dir='data', log_dir='log', min_attrib_num=3):
+                 data_dir='data', log_dir='log'):
         self.chunk_size = chunk_size
         self.log_interval = log_interval
-        self.min_attrib_num = min_attrib_num
         self.urls = Queue()
         self.results = Queue()
         self.url_cache = set()
@@ -71,7 +70,7 @@ class Spider(object):
             exit()
         else:
             with open(os.path.join(self.log_dir, 'log'), 'ab+') as fp:
-                message = '增加实体数量：{}，保存实体数量：{}；缓存任务数量：{}，缓存结果数量：{}.'.format(
+                message = '新增词条数量：{}，已抓取词条数量：{}；缓存任务数量：{}，缓存结果数量：{}.'.format(
                     increase, now, self.urls._qsize(), self.results._qsize(),
                 ) + '\n'
                 fp.write(message.encode('utf8'))
@@ -92,7 +91,7 @@ class Spider(object):
                 if name not in self.name_cache:
                     self.name_cache.add(name)
                     self.url_cache.add(url)
-                    if len(new_data['infomation']) >= self.min_attrib_num:
+                    if new_data['infomation']: #剔除没有属性信息的词条
                         self.results.put(new_data)
                 for url in new_urls:
                     if url not in self.url_cache:
@@ -104,7 +103,6 @@ class Spider(object):
 def main(worker_num=20,
          chunk_size=10000,
          log_interval=600,
-         min_attrib_num=3,
          data_dir='data',
          log_dir='log',
          start_url='https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28'):
