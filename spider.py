@@ -73,7 +73,7 @@ class Spider(object):
                 message = 'Increase %d entities, totally saved %d entities.' % (increase, now) + '\n'
                 fp.write(message.encode('utf8'))
         timer = Timer(self.log_interval, _log)
-        timer.start()
+        timer.start() 
 
     def _scrap(self):
         while self.state:
