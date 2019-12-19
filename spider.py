@@ -8,6 +8,7 @@ class Spider(object):
     def __init__(self, worker_num=10, chunk_size=10000, log_interval=600,
                  data_dir='data', log_dir='log'):
         self.chunk_size = chunk_size
+        self.log_interval = log_interval
         self.urls = Queue()
         self.results = Queue()
         self.url_cache = set()
@@ -71,6 +72,8 @@ class Spider(object):
             with open(os.path.join(self.log_dir, 'log'), 'ab+') as fp:
                 message = 'Increase %d entities, totally saved %d entities.' % (increase, now) + '\n'
                 fp.write(message.encode('utf8'))
+        timer = Timer(self.log_interval, _log)
+        timer.start()
 
     def _scrap(self):
         while self.state:
