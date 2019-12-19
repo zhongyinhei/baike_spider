@@ -74,7 +74,7 @@ class Spider(object):
                     increase, now, self.urls._qsize(), self.results._qsize(),
                 ) + '\n'
                 fp.write(message.encode('utf8'))
-        timer = Timer(self.log_interval, _log)
+        timer = Timer(self.log_interval, self._log)
         timer.start() 
 
     def _scrap(self):
