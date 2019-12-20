@@ -1,8 +1,9 @@
 from parser import HtmlParser
+from utils import Set, Dict
 from queue import Queue
 from threading import Thread, Timer
 from time import sleep, time
-import json, os, fire, logging
+import json, os, fire
 
 class Spider(object):
     def __init__(self, worker_num=10, chunk_size=10000, log_interval=600,
@@ -11,8 +12,10 @@ class Spider(object):
         self.log_interval = log_interval
         self.urls = Queue()
         self.results = Queue()
-        self.url_cache = set()
-        self.name_cache = set()
+        self.url_cache = Set()
+        self.name_cache = Set()
+        self.black_urls = Set()
+        self.black_cache = Dict()
         self.chunk_num = 0
         self.parser = HtmlParser(home='https://baike.baidu.com')
 
@@ -66,12 +69,12 @@ class Spider(object):
         self.last = now
         if increase == 0:
             self.state = 0
-            logging.info('Exit: no entities scraped in this round.')
+            print('Exit: no entities scraped in this round.')
             exit()
         else:
             with open(os.path.join(self.log_dir, 'log'), 'ab+') as fp:
-                message = '新增词条数量：{}，已抓取词条数量：{}；缓存任务数量：{}，缓存结果数量：{}.'.format(
-                    increase, now, self.urls._qsize(), self.results._qsize(),
+                message = '新增词条数量：{}，已抓取词条数量：{}；已获取url数量：{}，缓存任务数量：{}，缓存结果数量：{}.'.format(
+                    increase, now, len(self.url_cache), self.urls._qsize(), self.results._qsize(),
                 ) + '\n'
                 fp.write(message.encode('utf8'))
         timer = Timer(self.log_interval, self._log)
@@ -84,17 +87,22 @@ class Spider(object):
                 try:
                     new_urls, new_data = self.parser.parse(url)
                 except:
-                    sleep(1)
-                    self.urls.put(url)
+                    self.url_cache.remove(url)
+                    # 多次请求不成功的url加入黑名单
+                    if url not in self.black_cache:
+                        self.black_cache[url] = 1
+                    self.black_cache[url] += 1
+                    if self.black_cache[url] >= 3:
+                        self.black_urls.add(url)
                     continue
                 name = new_data['name']
                 if name not in self.name_cache:
                     self.name_cache.add(name)
-                    self.url_cache.add(url)
                     if new_data['infomation']: #剔除没有属性信息的词条
                         self.results.put(new_data)
                 for url in new_urls:
-                    if url not in self.url_cache:
+                    if url not in self.url_cache and url not in self.black_urls:
+                        self.url_cache.add(url)
                         self.urls.put(url)
             else:
                 sleep(10)
@@ -105,7 +113,7 @@ def main(worker_num=20,
          log_interval=600,
          data_dir='data',
          log_dir='log',
-         start_url='https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28'):
+         start_url='https://baike.baidu.com/item/姚明/28'):
     
     spider = Spider(
         worker_num=worker_num,

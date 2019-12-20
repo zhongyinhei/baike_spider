@@ -146,7 +146,8 @@ if __name__ == '__main__':
         'https://baike.baidu.com/item/%E5%84%92%E6%9E%97%E5%A4%96%E5%8F%B2/27018',
         'https://baike.baidu.com/item/%E5%BE%90%E9%94%A1%E9%BA%9F/820817',
         'https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28',
-        'https://baike.baidu.com/item/%E4%B9%89%E9%A1%B9'
+        'https://baike.baidu.com/item/%E4%B9%89%E9%A1%B9',
+        'https://baike.baidu.com/item/秒懂星课堂',
     ]
 
     with open('baike.json', 'wb') as fp:
