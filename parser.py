@@ -49,14 +49,14 @@ class HtmlParser(object):
         # get information
         info_node = soup.find('div', class_="basic-info cmn-clearfix")
         if info_node is None:
-            res_data['infomation'] = []
+            res_data['info'] = []
         else:
             name_nodes = info_node.find_all('dt', class_="basicInfo-item name")
             value_nodes = info_node.find_all('dd', class_="basicInfo-item value")
             assert len(name_nodes) == len(value_nodes), 'Number of names and values are not equal.'
             names = [self._clean_text(name.get_text()).strip() for name in name_nodes]
             values = [value.get_text().strip() for value in value_nodes]
-            res_data['infomation'] = dict(zip(names, values))
+            res_data['info'] = dict(zip(names, values))
 
         # get contents
         nodes = soup.find_all('div', class_=['para-title level-2', 'para-title level-3', 'para'])
