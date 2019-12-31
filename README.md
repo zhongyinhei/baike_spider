@@ -31,7 +31,7 @@ python spider.py --worker_num 20 --chunk_size 10000 --log_interval 600
   "summary": "姚明（Yao Ming），男，汉族，无党派人士...",
   "info": {"身高": "226cm", "祖籍": "苏州吴江",  ......},
   "labels": ["运动员",  "篮球",  ......],
-  "paras": [
+  "contents": [
   		{"title": "职业生涯", "text": "1998年4月，他入选王非执教的国家队..."},
   		{"title": "情感经历", "text": "姚明17岁时第一次见到叶莉..."},
   		......
